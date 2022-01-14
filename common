@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+lowercase() {
+    output=""
+    for var in "$@"; do
+        output="$(echo $var | tr '[:upper:]' '[:lower:]')"
+    done
+    echo $output
+}

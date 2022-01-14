@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+set -e
+
+echo "Personal Relationship Manager v0.1.0"

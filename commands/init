@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+set -e
+
+if [ ! -d ~/.prm ]; then
+    mkdir ~/.prm
+    mkdir ~/.prm/contacts
+fi
+
+echo "Initialized."

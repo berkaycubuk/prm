@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+set -e
+export PKB_WORKDIR=$(dirname "$0")
+. "$PKB_WORKDIR/common"
+
+cli_help() {
+    echo "Personal Relationship Manager
+Developed by: Berkay Çubuk <berkay@berkaycubuk.com>
+Version: 0.1.0
+
+Usage: prm [command] [subcommand] [flags]
+
+Flags:
+    - n         Name
+    -l          Lastname
+    -m          Email
+    -p          Phone
+    -k          Location
+    -u          Nickname
+
+Commands:
+    init        Initialize 
+    contact     Manage contacts
+        - new         Create new contact
+        - view        View contact information
+        - delete      Delete contact
+    version     Version
+    *           Help"
+    exit 1
+}
+
+case "$1" in
+    init|i)
+        "$PKB_WORKDIR/commands/init"
+        ;;
+    contact|c)
+        "$PKB_WORKDIR/commands/contact" "${@:2}"
+        ;;
+    version|v)
+        "$PKB_WORKDIR/commands/version"
+        ;;
+    *)
+        cli_help
+        ;;
+esac

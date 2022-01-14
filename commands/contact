@@ -1,0 +1,169 @@
+#!/usr/bin/env bash
+set -e
+. "$PKB_WORKDIR/common"
+
+new_contact() {
+    NAME=""
+    LASTNAME=""
+    EMAIL=""
+    PHONE=""
+    LOCATION=""
+    NICKNAME=""
+    while getopts "n:l:m:p:k:u:" option; do
+        case $option in
+            n)
+                NAME="$OPTARG"
+                ;;
+            l)
+                LASTNAME="$OPTARG"
+                ;;
+            m)
+                EMAIL="$OPTARG"
+                ;;
+            p)
+                PHONE="$OPTARG"
+                ;;
+            k)
+                LOCATION="$OPTARG"
+                ;;
+            u)
+                NICKNAME="$OPTARG"
+                ;;
+        esac
+    done
+
+    if [[ $NAME == "" ]]; then
+        echo "Name required!"
+        exit 1; fi
+    if [[ $LASTNAME == "" ]]; then
+        echo "Lastname required!"
+        exit 1; fi
+
+    FILENAME="$(lowercase "${NAME}_${LASTNAME}").md"
+
+    FRONTMATTER="---\nname: ${NAME}\nlastname: ${LASTNAME}\nlocation: ${LOCATION}\nphone: ${PHONE}\nemail: ${EMAIL}\nnickname: ${NICKNAME}\n---"
+
+    echo -e $FRONTMATTER > ~/.prm/contacts/$FILENAME
+}
+
+delete_contact() {
+    NAME=""
+    LASTNAME=""
+    while getopts "n:l:" option; do
+        case $option in
+            n)
+                NAME="$OPTARG"
+                ;;
+            l)
+                LASTNAME="$OPTARG"
+                ;;
+        esac
+    done
+
+    if [[ $NAME == "" ]]; then
+        echo "Name required!"
+        exit 1; fi
+    if [[ $LASTNAME == "" ]]; then
+        echo "Lastname required!"
+        exit 1; fi
+
+    FILENAME="$(lowercase "${NAME}_${LASTNAME}").md"
+
+    read -p "Are you sure? (y/n)" -n 1 -r
+    echo # move to new line
+
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        rm ~/.prm/contacts/$FILENAME
+    fi
+}
+
+contact_frontmatter_parser() {
+    NAME=""
+    LASTNAME=""
+    EMAIL=""
+    PHONE=""
+    LOCATION=""
+    NICKNAME=""
+    while IFS= read -r line; do
+        if [[ $line == "---" ]]; then
+            continue
+        fi
+        property_name=$(cut -d':' -f1 <<<"$line")
+        property_value=$(cut -d':' -f2 <<<"$line" | awk '{$1=$1};1')
+        case $property_name in
+            name)
+                NAME=$property_value
+                ;;
+            lastname)
+                LASTNAME=$property_value
+                ;;
+            email)
+                EMAIL=$property_value
+                ;;
+            phone)
+                PHONE=$property_value
+                ;;
+            location)
+                LOCATION=$property_value
+                ;;
+            nickname)
+                NICKNAME=$property_value
+                ;;
+        esac
+    done < $1
+
+    # name|lastname|email|phone|location|nickname
+    echo "$NAME|$LASTNAME|$EMAIL|$PHONE|$LOCATION|$NICKNAME"
+}
+
+view_contact() {
+    NAME=""
+    LASTNAME=""
+    EMAIL=""
+    PHONE=""
+    while getopts "n:l:m:p:" option; do
+        case $option in
+            n)
+                NAME="$OPTARG"
+                ;;
+            l)
+                LASTNAME="$OPTARG"
+                ;;
+            m)
+                EMAIL="$OPTARG"
+                ;;
+            p)
+                PHONE="$OPTARG"
+                ;;
+        esac
+    done
+
+    if [[ $NAME != "" && $LASTNAME != "" ]]; then
+        FILENAME="$(lowercase "${NAME}_${LASTNAME}").md"
+    elif [[ $NAME != "" ]]; then
+        FILENAME="$(lowercase "${NAME}_*").md"
+    elif [[ $LASTNAME != "" ]]; then
+        FILENAME="$(lowercase "*_${LASTNAME}").md"
+    else
+        FILENAME="*.md"
+    fi
+
+    for contact_file in ~/.prm/contacts/$FILENAME; do
+        contact_frontmatter_parser $contact_file
+    done
+}
+
+case "$1" in
+    new|n)
+        new_contact "${@:2}"
+        ;;
+    delete|d)
+        delete_contact "${@:2}"
+        ;;
+    view|v)
+        view_contact "${@:2}"
+        ;;
+    *)
+        echo "undefined command"
+        ;;
+esac
