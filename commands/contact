@@ -153,6 +153,44 @@ view_contact() {
     done
 }
 
+edit_contact() {
+    NAME=""
+    LASTNAME=""
+    EMAIL=""
+    PHONE=""
+    while getopts "n:l:m:p:" option; do
+        case $option in
+            n)
+                NAME="$OPTARG"
+                ;;
+            l)
+                LASTNAME="$OPTARG"
+                ;;
+            m)
+                EMAIL="$OPTARG"
+                ;;
+            p)
+                PHONE="$OPTARG"
+                ;;
+        esac
+    done
+
+    if [[ $NAME != "" && $LASTNAME != "" ]]; then
+        FILENAME="$(lowercase "${NAME}_${LASTNAME}").md"
+    elif [[ $NAME != "" ]]; then
+        FILENAME="$(lowercase "${NAME}_*").md"
+    elif [[ $LASTNAME != "" ]]; then
+        FILENAME="$(lowercase "*_${LASTNAME}").md"
+    else
+        FILENAME="*.md"
+    fi
+
+    for contact_file in ~/.prm/contacts/$FILENAME; do
+        vim ~/.prm/contacts/$FILENAME
+        exit 1
+    done
+}
+
 case "$1" in
     new|n)
         new_contact "${@:2}"
@@ -162,6 +200,9 @@ case "$1" in
         ;;
     view|v)
         view_contact "${@:2}"
+        ;;
+    edit|e)
+        edit_contact "${@:2}"
         ;;
     *)
         echo "undefined command"
