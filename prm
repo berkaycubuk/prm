@@ -23,6 +23,7 @@ Commands:
     contact     Manage contacts
         - new         Create new contact
         - view        View contact information
+        - edit        Edit contact
         - delete      Delete contact
     version     Version
     *           Help"
